@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genius Bookshop Management System Feedback</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getDatabase, ref, push } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
+        // Your Firebase config (replace with your actual config)
+        const firebaseConfig = {
+            // Replace these with your actual Firebase config values
+              apiKey: "AIzaSyDDY0yl3_wriRANMtC64UvUM3t0BzV3MwI",
+                authDomain: "test-tms-abd35.firebaseapp.com",
+            databaseURL: "https://test-tms-abd35-default-rtdb.firebaseio.com",
+  projectId: "test-tms-abd35",
+  storageBucket: "test-tms-abd35.firebasestorage.app",
+  messagingSenderId: "769773304066",
+  appId: "1:769773304066:web:cde8eb10783cf6c2086a1b",
+  measurementId: "G-DVR3S3F5N9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        window.submitFeedback = async function(formData) {
+            try {
+                const feedbackRef = ref(database, 'feedback');
+                await push(feedbackRef, {
+                    ...formData,
+                    timestamp: new Date().toISOString()
+                });
+                return true;
+            } catch (error) {
+                console.error('Error submitting feedback:', error);
+                return false;
+            }
+        };
+    </script>
+    <style>
+        .star {
+            transition: all 0.2s ease;
+            cursor: pointer;
+            font-size: 2rem;
+            padding: 0.25rem;
+            user-select: none;
+        }
+        .star:focus {
+            outline: 2px solid #818cf8;
+            border-radius: 4px;
+        }
+        .star.filled {
+            color: #fbbf24;
+            filter: drop-shadow(0 0 2px rgba(251, 191, 36, 0.5));
+            transform: scale(1.1);
+        }
+        .star.unfilled {
+            color: #d1d5db;
+        }
+        .rating-container {
+            position: relative;
+        }
+        .rating-container:hover .star {
+            color: #fbbf24;
+        }
+        .rating-container .star:hover ~ .star {
+            color: #d1d5db;
+        }
+        .rating-tooltip {
+            position: absolute;
+            top: -2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .rating-container:hover .rating-tooltip {
+            opacity: 1;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .form-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg p-4">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8 glass rounded-2xl p-8 text-white">
+            <div class="flex items-center justify-center mb-4">
+                <svg class="w-12 h-12 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <h1 class="text-4xl font-bold">Genius Bookshop Management System</h1>
+            </div>
+            <h2 class="text-2xl font-semibold mb-4">Feedback Survey</h2>
+            <p class="text-lg opacity-90">Thank you for using our system. Please share your feedback to help us improve. Takes 5 minutes. Responses are anonymous.</p>
+        </div>
+
+        <!-- Form -->
+        <div class="form-section rounded-2xl shadow-2xl p-8">
+            <form id="feedbackForm" class="space-y-8">
+                <!-- Role Selection -->
+                <div class="space-y-4">
+                    <label class="block text-lg font-semibold text-gray-800 mb-3">
+                        Your role in the bookshop? <span class="text-sm text-gray-500 font-normal">(Optional)</span>
+                    </label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="role" value="manager" class="sr-only peer">
+                            <div class="p-4 border-2 border-gray-200 rounded-xl text-center transition-all peer-checked:border-purple-500 peer-checked:bg-purple-50 peer-checked:text-purple-700 hover:border-purple-300">
+                                <div class="font-medium">Manager</div>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="role" value="sales_staff" class="sr-only peer">
+                            <div class="p-4 border-2 border-gray-200 rounded-xl text-center transition-all peer-checked:border-purple-500 peer-checked:bg-purple-50 peer-checked:text-purple-700 hover:border-purple-300">
+                                <div class="font-medium">Sales Staff</div>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="role" value="inventory_staff" class="sr-only peer">
+                            <div class="p-4 border-2 border-gray-200 rounded-xl text-center transition-all peer-checked:border-purple-500 peer-checked:bg-purple-50 peer-checked:text-purple-700 hover:border-purple-300">
+                                <div class="font-medium">Inventory Staff</div>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="role" value="other" class="sr-only peer">
+                            <div class="p-4 border-2 border-gray-200 rounded-xl text-center transition-all peer-checked:border-purple-500 peer-checked:bg-purple-50 peer-checked:text-purple-700 hover:border-purple-300">
+                                <div class="font-medium">Other</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <hr class="border-gray-200">
+
+                <!-- Rating Questions -->
+                <div class="space-y-8">
+                    <h3 class="text-xl font-bold text-gray-800 text-center mb-8">Please rate your experience <span class="text-red-500">*</span></h3>
+                    
+                    <div class="space-y-6" id="ratingQuestions">
+                        <!-- Questions will be generated by JavaScript -->
+                    </div>
+                </div>
+
+                <hr class="border-gray-200">
+
+                <!-- Suggestions -->
+                <div class="space-y-4">
+                    <label for="suggestions" class="block text-lg font-semibold text-gray-800">
+                        Suggestions for improvement? <span class="text-sm text-gray-500 font-normal">(Optional)</span>
+                    </label>
+                    <textarea 
+                        id="suggestions" 
+                        name="suggestions" 
+                        rows="5" 
+                        placeholder="Share your thoughts and suggestions here..."
+                        class="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all resize-none"
+                    ></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-center pt-6">
+                    <button 
+                        type="submit" 
+                        class="px-12 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold text-lg rounded-xl hover:from-purple-700 hover:to-blue-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    >
+                        Submit Feedback
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Success Message -->
+        <div id="successMessage" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-2xl p-8 mx-4 max-w-md text-center transform transition-all">
+                <div class="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
+                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Thank You!</h3>
+                <p class="text-gray-600 mb-6">Your feedback has been submitted successfully.</p>
+                <button onclick="closeSuccessMessage()" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            "Login is secure and easy.",
+            "Viewing books is clear.",
+            "Adding books is straightforward.",
+            "Updating/deleting books is intuitive.",
+            "Selling books is accurate.",
+            "Company/sales info is accessible.",
+            "Menu is user-friendly.",
+            "Error messages are helpful.",
+            "The system meets the bookshop's needs."
+        ];
+
+        const ratingLabels = {
+            1: "Strongly Disagree",
+            2: "Disagree", 
+            3: "Neutral",
+            4: "Agree",
+            5: "Strongly Agree"
+        };
+
+        // Generate rating questions
+        function generateRatingQuestions() {
+            const container = document.getElementById('ratingQuestions');
+            
+            questions.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'p-6 bg-gray-50 rounded-xl border border-gray-200';
+                
+                const ratingContainer = document.createElement('div');
+                ratingContainer.className = 'rating-container flex space-x-1';
+                ratingContainer.dataset.question = index;
+                ratingContainer.setAttribute('role', 'radiogroup');
+                ratingContainer.setAttribute('aria-label', `Rating for: ${question}`);
+
+                // Create tooltip
+                const tooltip = document.createElement('div');
+                tooltip.className = 'rating-tooltip';
+                tooltip.textContent = 'Click to rate';
+                ratingContainer.appendChild(tooltip);
+
+                // Create stars
+                for (let i = 1; i <= 5; i++) {
+                    const star = document.createElement('button');
+                    star.type = 'button';
+                    star.className = 'star unfilled';
+                    star.dataset.rating = i;
+                    star.dataset.question = index;
+                    star.innerHTML = '★';
+                    star.setAttribute('role', 'radio');
+                    star.setAttribute('aria-checked', 'false');
+                    star.setAttribute('aria-label', `${i} star${i !== 1 ? 's' : ''} - ${ratingLabels[i]}`);
+                    star.setAttribute('tabindex', '0');
+                    
+                    // Add keyboard support
+                    star.addEventListener('keydown', (e) => {
+                        if (e.key === ' ' || e.key === 'Enter') {
+                            e.preventDefault();
+                            handleStarClick(star);
+                        }
+                    });
+
+                    ratingContainer.appendChild(star);
+                }
+
+                questionDiv.innerHTML = `
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                        <div class="lg:w-1/2">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-2">
+                                ${String(index + 1).padStart(2, '0')}. ${question}
+                                <span class="text-red-500">*</span>
+                            </h4>
+                            <div class="text-sm text-gray-600" id="label-${index}">
+                                Please select a rating
+                            </div>
+                        </div>
+                        <div class="lg:w-1/2 flex justify-center lg:justify-end">
+                        </div>
+                    </div>
+                `;
+
+                questionDiv.querySelector('.lg\\:w-1\\/2.flex').appendChild(ratingContainer);
+                container.appendChild(questionDiv);
+            });
+        }
+
+        // Add this new function to handle star clicks
+        function handleStarClick(starElement) {
+            const rating = parseInt(starElement.dataset.rating);
+            const questionIndex = parseInt(starElement.dataset.question);
+            const container = starElement.closest('.rating-container');
+            const stars = container.querySelectorAll('.star');
+            const label = document.getElementById(`label-${questionIndex}`);
+            
+            // Update stars
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.remove('unfilled');
+                    star.classList.add('filled');
+                } else {
+                    star.classList.remove('filled');
+                    star.classList.add('unfilled');
+                }
+                // Update ARIA attributes
+                star.setAttribute('aria-checked', index < rating ? 'true' : 'false');
+            });
+            
+            // Update label with animation
+            label.style.opacity = '0';
+            setTimeout(() => {
+                label.textContent = ratingLabels[rating];
+                label.className = `text-sm font-medium transition-all duration-300 ${
+                    rating <= 2 ? 'text-red-600' : rating >= 4 ? 'text-green-600' : 'text-yellow-600'
+                }`;
+                label.style.opacity = '1';
+            }, 200);
+            
+            // Store rating
+            container.dataset.selectedRating = rating;
+
+            // Add success animation
+            const ripple = document.createElement('div');
+            ripple.className = 'absolute inset-0 bg-purple-500 bg-opacity-20 rounded-full animate-ping';
+            starElement.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 700);
+        }
+
+        // Update the event listener in handleStarRating
+        function handleStarRating() {
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('star')) {
+                    handleStarClick(e.target);
+                }
+            });
+        }
+
+        // Form submission
+        document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Validate required ratings
+            const ratingContainers = document.querySelectorAll('.rating-container');
+            const ratings = {};
+            let allRated = true;
+            
+            ratingContainers.forEach(container => {
+                const questionIndex = container.dataset.question;
+                const rating = container.dataset.selectedRating;
+                
+                if (!rating) {
+                    allRated = false;
+                    container.classList.add('animate-pulse');
+                    setTimeout(() => container.classList.remove('animate-pulse'), 2000);
+                } else {
+                    ratings[`question_${questionIndex}`] = parseInt(rating);
+                }
+            });
+            
+            if (!allRated) {
+                alert('Please rate all questions before submitting.');
+                return;
+            }
+            
+            // Collect form data
+            const formData = new FormData(e.target);
+            const data = {
+                role: formData.get('role') || 'not_specified',
+                ratings: ratings,
+                suggestions: formData.get('suggestions') || ''
+            };
+            
+            // Submit to Firebase
+            try {
+                console.log('Submitting feedback data:', data);
+                
+                const success = await window.submitFeedback(data);
+                
+                if (!success) {
+                    throw new Error('Failed to submit feedback');
+                }
+                
+                document.getElementById('successMessage').classList.remove('hidden');
+            } catch (error) {
+                console.error('Submission error:', error);
+                alert('Error submitting feedback. Please try again.');
+            }
+        });
+
+        function closeSuccessMessage() {
+            document.getElementById('successMessage').classList.add('hidden');
+            document.getElementById('feedbackForm').reset();
+            
+            // Reset all ratings
+            document.querySelectorAll('.star').forEach(star => {
+                star.classList.remove('filled');
+                star.classList.add('unfilled');
+            });
+            
+            document.querySelectorAll('.rating-container').forEach(container => {
+                delete container.dataset.selectedRating;
+            });
+            
+            // Reset labels
+            questions.forEach((_, index) => {
+                const label = document.getElementById(`label-${index}`);
+                label.textContent = 'Please select a rating';
+                label.className = 'text-sm text-gray-600';
+            });
+        }
+
+        // Initialize
+        generateRatingQuestions();
+        handleStarRating();
+    </script>
+</body>
+</html>
