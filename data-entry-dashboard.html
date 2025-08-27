@@ -24,6 +24,12 @@
         .status-success { color: #10b981; }
         .status-error { color: #ef4444; }
         .status-info { color: #3b82f6; }
+        .config-step {
+            border-left: 4px solid #3b82f6;
+            background-color: #eff6ff;
+            padding: 12px;
+            margin: 8px 0;
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -34,45 +40,87 @@
             <p class="text-gray-600">Enter data and save it directly to Google Sheets</p>
         </div>
 
-        <!-- Configuration Panel -->
+        <!-- Enhanced Configuration Panel -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Configuration</h2>
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Configuration & Setup</h2>
             
-            <!-- Setup Instructions -->
-            <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-6">
-                <h3 class="text-sm font-medium text-yellow-800 mb-2">Setup Instructions:</h3>
-                <ol class="text-sm text-yellow-700 list-decimal list-inside space-y-1">
-                    <li>Go to <a href="https://console.cloud.google.com" target="_blank" class="underline">Google Cloud Console</a></li>
-                    <li>Create project → Enable Google Sheets API</li>
-                    <li>Create OAuth2 Client ID (Web application)</li>
-                    <li><strong>Add your domain to authorized origins:</strong> http://localhost AND http://127.0.0.1</li>
-                    <li>Create a Google Sheet with headers: Name, Email, Phone, Message, Timestamp</li>
-                </ol>
+            <!-- Current URL Display -->
+            <div class="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
+                <h3 class="text-sm font-medium text-blue-800 mb-2">Current URL Information:</h3>
+                <p class="text-sm text-blue-700">
+                    <strong>Origin:</strong> <code class="bg-white px-2 py-1 rounded" id="currentOrigin"></code>
+                </p>
+                <p class="text-sm text-blue-700 mt-1">
+                    <strong>Full URL:</strong> <code class="bg-white px-2 py-1 rounded" id="currentURL"></code>
+                </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Detailed Setup Instructions -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-6">
+                <h3 class="text-sm font-medium text-yellow-800 mb-3">Complete Setup Instructions:</h3>
+                
+                <div class="config-step">
+                    <h4 class="font-medium text-gray-800">Step 1: Google Cloud Console</h4>
+                    <p class="text-sm text-gray-600 mt-1">Go to <a href="https://console.cloud.google.com" target="_blank" class="underline text-blue-600">Google Cloud Console</a></p>
+                </div>
+
+                <div class="config-step">
+                    <h4 class="font-medium text-gray-800">Step 2: Enable API</h4>
+                    <p class="text-sm text-gray-600 mt-1">Navigate to APIs & Services → Library → Search for "Google Sheets API" → Enable it</p>
+                </div>
+
+                <div class="config-step">
+                    <h4 class="font-medium text-gray-800">Step 3: Create OAuth Client</h4>
+                    <p class="text-sm text-gray-600 mt-1">Go to APIs & Services → Credentials → Create Credentials → OAuth client ID → Web application</p>
+                </div>
+
+                <div class="config-step">
+                    <h4 class="font-medium text-gray-800">Step 4: Configure Authorized Origins (CRITICAL)</h4>
+                    <p class="text-sm text-gray-600 mt-1">Add these to "Authorized JavaScript origins":</p>
+                    <ul class="text-xs text-gray-600 mt-2 space-y-1">
+                        <li>• <code class="bg-white px-1 rounded">https://muditha23.github.io</code></li>
+                        <li>• <code class="bg-white px-1 rounded">http://localhost</code></li>
+                        <li>• <code class="bg-white px-1 rounded">http://127.0.0.1</code></li>
+                        <li>• <code class="bg-white px-1 rounded" id="dynamicOrigin"></code></li>
+                    </ul>
+                </div>
+
+                <div class="config-step">
+                    <h4 class="font-medium text-gray-800">Step 5: Create Google Sheet</h4>
+                    <p class="text-sm text-gray-600 mt-1">Create a new Google Sheet with these exact headers in row 1:</p>
+                    <p class="text-xs text-gray-600 mt-1 font-mono bg-white p-2 rounded">Name | Email | Phone | Message | Timestamp</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">OAuth2 Client ID</label>
                     <input type="text" id="clientId" 
-                           value="722325759707-q8n7mh0454oktuh2smmkofdra7ojjrr7.apps.googleusercontent.com"
+                           placeholder="Your-Client-ID.apps.googleusercontent.com"
                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <p class="text-xs text-gray-500 mt-1">Get this from Google Cloud Console → Credentials</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Sheet ID</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Google Sheet ID</label>
                     <input type="text" id="sheetId" 
-                           value="1UQMtwy3KuBOj8vuxCzXFEB79A8FDH784_nr5YZfBCzc"
+                           placeholder="Get from Google Sheet URL"
                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <p class="text-xs text-gray-500 mt-1">Found in the URL between /d/ and /edit</p>
                 </div>
             </div>
             
-            <div class="mt-4 space-x-4">
+            <div class="mt-6 flex flex-wrap gap-3">
                 <button onclick="initializeGoogleAPI()" 
-                        class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition duration-200">
-                    Initialize & Sign In
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition duration-200 font-medium">
+                    🔐 Initialize & Sign In
+                </button>
+                <button onclick="testSheetAccess()" 
+                        class="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-md transition duration-200 font-medium">
+                    🧪 Test Sheet Access
                 </button>
                 <button onclick="signOut()" 
-                        class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-md transition duration-200">
-                    Sign Out
+                        class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-md transition duration-200 font-medium">
+                    🚪 Sign Out
                 </button>
             </div>
             <div id="authStatus" class="mt-4"></div>
@@ -80,33 +128,33 @@
 
         <!-- Data Entry Form -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Add New Entry</h2>
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">📝 Add New Entry</h2>
             <form id="dataForm" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Name *</label>
                         <input type="text" id="name" required 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
                         <input type="email" id="email" required 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
                         <input type="tel" id="phone" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Message</label>
                     <textarea id="message" rows="3" 
-                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical"></textarea>
                 </div>
                 <button type="submit" id="submitBtn"
-                        class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-                    Save to Google Sheet
+                        class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-md transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium">
+                    💾 Save to Google Sheet
                 </button>
             </form>
             <div id="formStatus" class="mt-4"></div>
@@ -114,15 +162,24 @@
 
         <!-- Data Display -->
         <div class="bg-white rounded-lg shadow-md p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold text-gray-800">Current Data</h2>
-                <button onclick="loadData()" 
-                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-200">
-                    Refresh Data
-                </button>
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
+                <h2 class="text-xl font-semibold text-gray-800">📊 Current Data</h2>
+                <div class="flex gap-2">
+                    <button onclick="loadData()" 
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-200 text-sm">
+                        🔄 Refresh Data
+                    </button>
+                    <button onclick="exportData()" 
+                            class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition duration-200 text-sm">
+                        📥 Export CSV
+                    </button>
+                </div>
             </div>
             <div id="dataContainer">
-                <p class="text-gray-500">Sign in and connect to view your Google Sheet data</p>
+                <div class="bg-gray-50 border border-gray-200 rounded-md p-6 text-center">
+                    <p class="text-gray-500 mb-2">🔐 Sign in and connect to view your Google Sheet data</p>
+                    <p class="text-xs text-gray-400">Configure your OAuth settings above and click "Initialize & Sign In"</p>
+                </div>
             </div>
         </div>
     </div>
@@ -132,21 +189,29 @@
         let isSignedIn = false;
         let tokenClient = null;
         let accessToken = null;
+        let currentData = [];
 
-        // Initialize Google API with proper GIS implementation
+        // Display current URL information
+        function updateURLInfo() {
+            document.getElementById('currentOrigin').textContent = window.location.origin;
+            document.getElementById('currentURL').textContent = window.location.href;
+            document.getElementById('dynamicOrigin').textContent = window.location.origin;
+        }
+
+        // Enhanced Google API initialization with better error handling
         async function initializeGoogleAPI() {
-            const clientId = document.getElementById('clientId').value;
-            SHEET_ID = document.getElementById('sheetId').value;
+            const clientId = document.getElementById('clientId').value.trim();
+            SHEET_ID = document.getElementById('sheetId').value.trim();
             
             if (!clientId || !SHEET_ID) {
                 showStatus('authStatus', 'Please enter both Client ID and Sheet ID', 'error');
                 return;
             }
 
-            showStatus('authStatus', 'Initializing Google API...', 'info');
+            showStatus('authStatus', '🔄 Initializing Google API...', 'info');
 
             try {
-                // Load the Google API client first
+                // Load the Google API client
                 await new Promise((resolve, reject) => {
                     gapi.load('client', { 
                         callback: resolve, 
@@ -154,87 +219,165 @@
                     });
                 });
 
-                // Initialize the GAPI client (without auth)
+                // Initialize the GAPI client
                 await gapi.client.init({
-                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
+                    clientId: clientId,
+                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+                    scope: 'https://www.googleapis.com/auth/spreadsheets'
                 });
 
-                // Initialize the token client using GIS
+                // Initialize the token client for OAuth2 with improved configuration
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: clientId,
                     scope: 'https://www.googleapis.com/auth/spreadsheets',
                     prompt: 'consent',
                     callback: (response) => {
+                        console.log('Auth response:', response);
+                        
                         if (response.error) {
+                            let errorMessage = `Authentication failed: ${response.error}`;
+                            
+                            if (response.error === 'redirect_uri_mismatch') {
+                                errorMessage += `. Please add "${window.location.origin}" to your OAuth2 client's authorized JavaScript origins in Google Cloud Console.`;
+                            }
+                            
+                            showStatus('authStatus', errorMessage, 'error');
                             console.error('Token error:', response);
-                            showStatus('authStatus', `Authentication failed: ${response.error}`, 'error');
                             return;
                         }
                         
-                        // Set the access token
                         accessToken = response.access_token;
                         gapi.client.setToken({access_token: accessToken});
                         handleSignIn();
                     },
                     error_callback: (error) => {
                         console.error('OAuth error:', error);
-                        showStatus('authStatus', `OAuth error: ${error.message || 'Unknown error'}`, 'error');
+                        showStatus('authStatus', `OAuth error: ${error.message || 'Unknown authentication error'}`, 'error');
                     }
                 });
 
+                showStatus('authStatus', '✅ API initialized. Requesting permissions...', 'info');
+                
                 // Request access token
-                tokenClient.requestAccessToken({prompt: 'consent'});
+                tokenClient.requestAccessToken({
+                    prompt: 'consent'
+                });
 
             } catch (error) {
-                console.error('Initialization error:', error);
+                console.error('Init error:', error);
                 
-                if (error.error === 'idpiframe_initialization_failed' || 
-                    (error.details && error.details.includes('not been registered'))) {
-                    showStatus('authStatus', `Origin not authorized. Please add ${window.location.origin} to your OAuth2 client's authorized JavaScript origins in Google Cloud Console.`, 'error');
-                } else {
-                    showStatus('authStatus', `Initialization error: ${error.message || error.details || 'Please check your Client ID and ensure the origin is authorized'}`, 'error');
+                let errorMessage = `Initialization error: ${error.message || 'Unknown error'}`;
+                
+                if (error.message && error.message.includes('origin')) {
+                    errorMessage += `. Make sure "${window.location.origin}" is added to your OAuth2 client's authorized JavaScript origins.`;
                 }
+                
+                showStatus('authStatus', errorMessage, 'error');
             }
         }
 
         // Handle successful sign in
-        function handleSignIn() {
+        async function handleSignIn() {
             isSignedIn = true;
-            showStatus('authStatus', 'Successfully authenticated! You can now save data to Google Sheets.', 'success');
+            showStatus('authStatus', '🎉 Successfully authenticated! Testing sheet access...', 'info');
             document.getElementById('submitBtn').disabled = false;
-            loadData();
+            
+            // Test sheet access immediately after sign in
+            await testSheetAccess(true);
+            
+            if (isSignedIn) {
+                loadData();
+            }
         }
 
-        // Sign out
+        // Enhanced sign out
         function signOut() {
-            if (accessToken) {
-                // Revoke the access token
-                google.accounts.oauth2.revoke(accessToken, () => {
-                    console.log('Token revoked');
-                });
+            try {
+                if (accessToken) {
+                    google.accounts.oauth2.revoke(accessToken);
+                }
+                
+                isSignedIn = false;
+                accessToken = null;
+                gapi.client.setToken(null);
+                
+                showStatus('authStatus', '👋 Signed out successfully', 'info');
+                document.getElementById('submitBtn').disabled = true;
+                document.getElementById('dataContainer').innerHTML = `
+                    <div class="bg-gray-50 border border-gray-200 rounded-md p-6 text-center">
+                        <p class="text-gray-500">🔐 Sign in to view your Google Sheet data</p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Sign out error:', error);
+                showStatus('authStatus', 'Sign out completed with warnings', 'info');
+            }
+        }
+
+        // Enhanced sheet access test
+        async function testSheetAccess(silent = false) {
+            if (!isSignedIn) {
+                showStatus('authStatus', 'Please sign in first', 'error');
+                return false;
+            }
+
+            if (!silent) {
+                showStatus('authStatus', '🧪 Testing sheet access...', 'info');
             }
             
-            // Clear local state
-            isSignedIn = false;
-            accessToken = null;
-            tokenClient = null;
-            
-            // Clear the token from gapi client
-            gapi.client.setToken(null);
-            
-            showStatus('authStatus', 'Signed out successfully', 'info');
-            document.getElementById('submitBtn').disabled = true;
-            document.getElementById('dataContainer').innerHTML = '<p class="text-gray-500">Sign in to view your Google Sheet data</p>';
+            try {
+                // First, try to get sheet metadata
+                const metaResponse = await gapi.client.sheets.spreadsheets.get({
+                    spreadsheetId: SHEET_ID
+                });
+                
+                if (metaResponse.status === 200) {
+                    const title = metaResponse.result.properties.title;
+                    
+                    // Test reading data
+                    const dataResponse = await gapi.client.sheets.spreadsheets.values.get({
+                        spreadsheetId: SHEET_ID,
+                        range: 'Sheet1!A1:E1'
+                    });
+                    
+                    if (dataResponse.status === 200) {
+                        if (!silent) {
+                            showStatus('authStatus', 
+                                `✅ Sheet access verified! Connected to "${title}". Ready to save data.`, 
+                                'success'
+                            );
+                        }
+                        return true;
+                    }
+                } else {
+                    throw new Error('Failed to access sheet metadata');
+                }
+            } catch (error) {
+                console.error('Sheet access error:', error);
+                
+                let errorMsg = `Sheet access failed: ${error.message}`;
+                
+                if (error.status === 404) {
+                    errorMsg = 'Sheet not found. Check that the Sheet ID is correct.';
+                } else if (error.status === 403) {
+                    errorMsg = 'Permission denied. Make sure the sheet is shared with your Google account or is public.';
+                } else if (error.message.includes('Invalid spreadsheet ID')) {
+                    errorMsg = 'Invalid Sheet ID format. Check that you copied the correct ID from the Google Sheet URL.';
+                }
+                
+                showStatus('authStatus', `❌ ${errorMsg}`, 'error');
+                return false;
+            }
         }
 
-        // Load data from Google Sheet
+        // Enhanced data loading with better error handling
         async function loadData() {
             if (!isSignedIn) {
                 showStatus('authStatus', 'Please sign in first', 'error');
                 return;
             }
 
-            document.getElementById('dataContainer').innerHTML = '<div class="loading"></div> Loading data...';
+            document.getElementById('dataContainer').innerHTML = '<div class="flex items-center justify-center p-8"><div class="loading"></div><span class="ml-3 text-gray-600">Loading data...</span></div>';
             
             try {
                 const response = await gapi.client.sheets.spreadsheets.values.get({
@@ -243,27 +386,41 @@
                 });
                 
                 if (response.result.values && response.result.values.length > 0) {
+                    currentData = response.result.values;
                     displayData(response.result.values);
                 } else {
                     document.getElementById('dataContainer').innerHTML = `
-                        <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
-                            <p class="text-blue-800">No data found. Make sure your sheet has headers in the first row:</p>
-                            <p class="text-sm text-blue-600 mt-2 font-mono">Name | Email | Phone | Message | Timestamp</p>
+                        <div class="bg-blue-50 border border-blue-200 rounded-md p-6 text-center">
+                            <h3 class="text-lg font-medium text-blue-800 mb-2">📄 Empty Sheet</h3>
+                            <p class="text-blue-700 mb-3">No data found. Make sure your sheet has headers in the first row:</p>
+                            <div class="bg-white border border-blue-300 rounded p-3 text-sm font-mono text-blue-800">
+                                Name | Email | Phone | Message | Timestamp
+                            </div>
+                            <p class="text-sm text-blue-600 mt-3">Add some data using the form above!</p>
                         </div>
                     `;
                 }
             } catch (error) {
                 console.error('Load error:', error);
                 document.getElementById('dataContainer').innerHTML = `
-                    <div class="bg-red-50 border border-red-200 rounded-md p-4">
-                        <p class="text-red-800">Error loading data: ${error.message}</p>
-                        <p class="text-sm text-red-600 mt-2">Check that the Sheet ID is correct and the sheet is accessible.</p>
+                    <div class="bg-red-50 border border-red-200 rounded-md p-6">
+                        <h3 class="text-lg font-medium text-red-800 mb-2">❌ Error Loading Data</h3>
+                        <p class="text-red-700 mb-2"><strong>Error:</strong> ${error.message}</p>
+                        <div class="text-sm text-red-600 space-y-1">
+                            <p><strong>Possible solutions:</strong></p>
+                            <ul class="list-disc list-inside ml-4 space-y-1">
+                                <li>Check that the Sheet ID is correct</li>
+                                <li>Ensure the sheet is accessible (shared or public)</li>
+                                <li>Verify the sheet name is "Sheet1" or update the range</li>
+                                <li>Make sure you have the correct permissions</li>
+                            </ul>
+                        </div>
                     </div>
                 `;
             }
         }
 
-        // Save data to Google Sheet
+        // Enhanced save function
         async function saveToSheet(data) {
             if (!isSignedIn) {
                 showStatus('formStatus', 'Please sign in first', 'error');
@@ -271,6 +428,24 @@
             }
 
             try {
+                // Check if sheet has headers first
+                const headerResponse = await gapi.client.sheets.spreadsheets.values.get({
+                    spreadsheetId: SHEET_ID,
+                    range: 'Sheet1!A1:E1'
+                });
+
+                // If no headers, add them first
+                if (!headerResponse.result.values || headerResponse.result.values.length === 0) {
+                    await gapi.client.sheets.spreadsheets.values.update({
+                        spreadsheetId: SHEET_ID,
+                        range: 'Sheet1!A1:E1',
+                        valueInputOption: 'USER_ENTERED',
+                        resource: {
+                            values: [['Name', 'Email', 'Phone', 'Message', 'Timestamp']]
+                        }
+                    });
+                }
+
                 const values = [[
                     data.name,
                     data.email, 
@@ -290,33 +465,55 @@
                 });
 
                 if (response.status === 200) {
-                    showStatus('formStatus', 'Data saved successfully to Google Sheet!', 'success');
-                    loadData(); // Refresh the display
+                    showStatus('formStatus', '🎉 Data saved successfully to Google Sheet!', 'success');
+                    setTimeout(() => loadData(), 1000); // Refresh after a short delay
                     return true;
                 } else {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
             } catch (error) {
                 console.error('Save error:', error);
-                showStatus('formStatus', `Error saving data: ${error.message}`, 'error');
+                
+                let errorMsg = `Error saving data: ${error.message}`;
+                if (error.status === 403) {
+                    errorMsg = 'Permission denied. Make sure you have edit access to the Google Sheet.';
+                } else if (error.status === 404) {
+                    errorMsg = 'Sheet not found. Check your Sheet ID.';
+                }
+                
+                showStatus('formStatus', `❌ ${errorMsg}`, 'error');
                 return false;
             }
         }
 
-        // Display data in table format
+        // Enhanced data display
         function displayData(data) {
             const headers = data[0];
             const rows = data.slice(1);
             
+            if (rows.length === 0) {
+                document.getElementById('dataContainer').innerHTML = `
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-md p-6 text-center">
+                        <h3 class="text-lg font-medium text-yellow-800 mb-2">📋 Headers Found</h3>
+                        <p class="text-yellow-700 mb-3">Sheet is properly configured but no data entries yet.</p>
+                        <div class="bg-white border border-yellow-300 rounded p-3 text-sm">
+                            <strong>Headers:</strong> ${headers.join(' | ')}
+                        </div>
+                        <p class="text-sm text-yellow-600 mt-3">Start adding entries using the form above!</p>
+                    </div>
+                `;
+                return;
+            }
+            
             let html = `
                 <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white">
+                    <table class="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
                         <thead class="bg-gray-50">
                             <tr>
             `;
             
             headers.forEach(header => {
-                html += `<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${header || 'Column'}</th>`;
+                html += `<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">${header || 'Column'}</th>`;
             });
             
             html += `
@@ -326,9 +523,20 @@
             `;
             
             rows.forEach((row, index) => {
-                html += `<tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}">`;
+                html += `<tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors">`;
                 headers.forEach((_, colIndex) => {
-                    html += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row[colIndex] || ''}</td>`;
+                    const cellValue = row[colIndex] || '';
+                    const isEmail = headers[colIndex] === 'Email' && cellValue.includes('@');
+                    const isPhone = headers[colIndex] === 'Phone' && cellValue;
+                    
+                    let cellContent = cellValue;
+                    if (isEmail) {
+                        cellContent = `<a href="mailto:${cellValue}" class="text-blue-600 hover:text-blue-800 underline">${cellValue}</a>`;
+                    } else if (isPhone) {
+                        cellContent = `<a href="tel:${cellValue}" class="text-blue-600 hover:text-blue-800 underline">${cellValue}</a>`;
+                    }
+                    
+                    html += `<td class="px-6 py-4 text-sm text-gray-900 max-w-xs truncate" title="${cellValue}">${cellContent}</td>`;
                 });
                 html += `</tr>`;
             });
@@ -337,13 +545,40 @@
                         </tbody>
                     </table>
                 </div>
-                <p class="text-sm text-gray-500 mt-4">Total entries: ${rows.length}</p>
+                <div class="flex justify-between items-center mt-4 text-sm text-gray-600">
+                    <p>📊 Total entries: <span class="font-semibold text-gray-800">${rows.length}</span></p>
+                    <p>🕒 Last updated: ${new Date().toLocaleTimeString()}</p>
+                </div>
             `;
             
             document.getElementById('dataContainer').innerHTML = html;
         }
 
-        // Handle form submission
+        // Export data as CSV
+        function exportData() {
+            if (currentData.length === 0) {
+                showStatus('formStatus', 'No data to export', 'error');
+                return;
+            }
+
+            const csvContent = currentData.map(row => 
+                row.map(cell => `"${(cell || '').replace(/"/g, '""')}"`).join(',')
+            ).join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `sheet-data-${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showStatus('formStatus', '📥 Data exported successfully!', 'success');
+        }
+
+        // Handle form submission with validation
         document.getElementById('dataForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -353,34 +588,66 @@
             }
 
             const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<div class="loading"></div> Saving...';
 
+            // Validate required fields
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            
+            if (!name || !email) {
+                showStatus('formStatus', 'Name and Email are required', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                return;
+            }
+
             const formData = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                phone: document.getElementById('phone').value,
-                message: document.getElementById('message').value,
-                timestamp: new Date().toLocaleString()
+                name: name,
+                email: email,
+                phone: document.getElementById('phone').value.trim(),
+                message: document.getElementById('message').value.trim(),
+                timestamp: new Date().toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                })
             };
 
             const success = await saveToSheet(formData);
             
             if (success) {
-                // Clear form
                 document.getElementById('dataForm').reset();
+                // Focus back to name field for next entry
+                document.getElementById('name').focus();
             }
 
             // Reset button
             submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Save to Google Sheet';
+            submitBtn.innerHTML = originalText;
         });
 
-        // Utility function to show status messages
+        // Utility function to show enhanced status messages
         function showStatus(elementId, message, type) {
             const element = document.getElementById(elementId);
+            const icons = {
+                success: '✅',
+                error: '❌',
+                info: 'ℹ️'
+            };
+            
             const colorClass = `status-${type}`;
-            element.innerHTML = `<p class="${colorClass} text-sm mt-2">${message}</p>`;
+            const icon = icons[type] || '';
+            
+            element.innerHTML = `
+                <div class="border-l-4 border-${type === 'success' ? 'green' : type === 'error' ? 'red' : 'blue'}-400 bg-${type === 'success' ? 'green' : type === 'error' ? 'red' : 'blue'}-50 p-4 rounded-md">
+                    <p class="${colorClass} text-sm font-medium">${icon} ${message}</p>
+                </div>
+            `;
             
             if (type === 'success') {
                 setTimeout(() => {
@@ -389,59 +656,86 @@
             }
         }
 
-        // Test Sheet Access
-        async function testSheetAccess() {
-            if (!isSignedIn) {
-                showStatus('authStatus', 'Please sign in first', 'error');
-                return;
-            }
+        // Auto-save form data to prevent loss
+        function saveFormData() {
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                message: document.getElementById('message').value
+            };
+            // Store in memory only (no localStorage in Claude artifacts)
+            window.tempFormData = formData;
+        }
 
-            try {
-                showStatus('authStatus', 'Testing sheet access...', 'info');
-                
-                // Try to get sheet metadata
-                const response = await gapi.client.sheets.spreadsheets.get({
-                    spreadsheetId: SHEET_ID
-                });
-                
-                if (response.status === 200) {
-                    showStatus('authStatus', `Sheet access verified! Sheet title: "${response.result.properties.title}"`, 'success');
-                } else {
-                    throw new Error('Failed to access sheet');
-                }
-            } catch (error) {
-                console.error('Sheet access error:', error);
-                showStatus('authStatus', `Sheet access failed: ${error.message}. Check that the Sheet ID is correct and the sheet is shared with your account.`, 'error');
+        function restoreFormData() {
+            if (window.tempFormData) {
+                document.getElementById('name').value = window.tempFormData.name || '';
+                document.getElementById('email').value = window.tempFormData.email || '';
+                document.getElementById('phone').value = window.tempFormData.phone || '';
+                document.getElementById('message').value = window.tempFormData.message || '';
             }
         }
 
-        // Initialize on page load
+        // Add input listeners for auto-save
+        ['name', 'email', 'phone', 'message'].forEach(field => {
+            document.getElementById(field).addEventListener('input', saveFormData);
+        });
+
+        // Enhanced initialization
         window.onload = function() {
+            // Update URL information
+            updateURLInfo();
+            
             // Disable submit button initially
             document.getElementById('submitBtn').disabled = true;
             
-            // Show instructions with current URL info
+            // Restore any temporarily saved form data
+            restoreFormData();
+            
+            // Show enhanced ready message
             document.getElementById('dataContainer').innerHTML = `
-                <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
-                    <h3 class="text-sm font-medium text-blue-800 mb-2">Ready to Connect</h3>
-                    <p class="text-sm text-blue-700 mb-2">Your current URL: <code class="bg-white px-1 rounded">${window.location.origin}</code></p>
-                    <p class="text-sm text-blue-700">Make sure this URL is added to your OAuth2 client's authorized JavaScript origins, then click "Initialize & Sign In".</p>
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-md p-6 text-center">
+                    <div class="text-4xl mb-4">🚀</div>
+                    <h3 class="text-lg font-medium text-blue-800 mb-2">Ready to Connect</h3>
+                    <p class="text-sm text-blue-700 mb-3">Configure your OAuth settings above and click "Initialize & Sign In"</p>
+                    <div class="text-xs text-blue-600 bg-white rounded p-2 border border-blue-300">
+                        <strong>Current Origin:</strong> ${window.location.origin}
+                    </div>
                 </div>
             `;
-            
-            // Add test button after initialization
-            const configPanel = document.querySelector('.bg-white.rounded-lg.shadow-md.p-6.mb-8:nth-child(2)');
-            if (configPanel) {
-                const buttonContainer = configPanel.querySelector('.mt-4.space-x-4');
-                if (buttonContainer) {
-                    const testButton = document.createElement('button');
-                    testButton.onclick = testSheetAccess;
-                    testButton.className = 'bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-md transition duration-200';
-                    testButton.textContent = 'Test Sheet Access';
-                    buttonContainer.appendChild(testButton);
+
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+Enter to save form
+                if (e.ctrlKey && e.key === 'Enter' && !document.getElementById('submitBtn').disabled) {
+                    document.getElementById('dataForm').dispatchEvent(new Event('submit'));
                 }
-            }
+                // F5 to refresh data (prevent default browser refresh)
+                if (e.key === 'F5' && isSignedIn) {
+                    e.preventDefault();
+                    loadData();
+                }
+            });
+
+            // Add helpful tooltips
+            document.getElementById('clientId').title = 'Get this from Google Cloud Console → APIs & Services → Credentials';
+            document.getElementById('sheetId').title = 'Found in your Google Sheet URL between /d/ and /edit';
         };
+
+        // Auto-refresh data every 30 seconds when signed in
+        setInterval(() => {
+            if (isSignedIn && document.visibilityState === 'visible') {
+                loadData();
+            }
+        }, 30000);
+
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && isSignedIn) {
+                loadData();
+            }
+        });
     </script>
 </body>
 </html>
