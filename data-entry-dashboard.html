@@ -133,7 +133,7 @@
         let tokenClient = null;
         let accessToken = null;
 
-        // Initialize Google API with improved error handling
+        // Initialize Google API with proper GIS implementation
         async function initializeGoogleAPI() {
             const clientId = document.getElementById('clientId').value;
             SHEET_ID = document.getElementById('sheetId').value;
@@ -146,7 +146,7 @@
             showStatus('authStatus', 'Initializing Google API...', 'info');
 
             try {
-                // Load the Google API client
+                // Load the Google API client first
                 await new Promise((resolve, reject) => {
                     gapi.load('client', { 
                         callback: resolve, 
@@ -154,40 +154,45 @@
                     });
                 });
 
-                // Initialize the GAPI client
+                // Initialize the GAPI client (without auth)
                 await gapi.client.init({
-                    clientId: clientId,
-                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
-                    scope: 'https://www.googleapis.com/auth/spreadsheets'
+                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
                 });
 
-                // Initialize the token client for OAuth2
+                // Initialize the token client using GIS
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: clientId,
                     scope: 'https://www.googleapis.com/auth/spreadsheets',
+                    prompt: 'consent',
                     callback: (response) => {
                         if (response.error) {
-                            showStatus('authStatus', `Authentication failed: ${response.error}`, 'error');
                             console.error('Token error:', response);
+                            showStatus('authStatus', `Authentication failed: ${response.error}`, 'error');
                             return;
                         }
                         
+                        // Set the access token
                         accessToken = response.access_token;
                         gapi.client.setToken({access_token: accessToken});
                         handleSignIn();
+                    },
+                    error_callback: (error) => {
+                        console.error('OAuth error:', error);
+                        showStatus('authStatus', `OAuth error: ${error.message || 'Unknown error'}`, 'error');
                     }
                 });
 
                 // Request access token
-                tokenClient.requestAccessToken();
+                tokenClient.requestAccessToken({prompt: 'consent'});
 
             } catch (error) {
-                console.error('Auth error:', error);
+                console.error('Initialization error:', error);
                 
-                if (error.error === 'idpiframe_initialization_failed') {
-                    showStatus('authStatus', `Origin not authorized. Please add your current URL (${window.location.origin}) to your OAuth2 client's authorized JavaScript origins in Google Cloud Console.`, 'error');
+                if (error.error === 'idpiframe_initialization_failed' || 
+                    (error.details && error.details.includes('not been registered'))) {
+                    showStatus('authStatus', `Origin not authorized. Please add ${window.location.origin} to your OAuth2 client's authorized JavaScript origins in Google Cloud Console.`, 'error');
                 } else {
-                    showStatus('authStatus', `Authentication error: ${error.message || error.details || 'Unknown error'}`, 'error');
+                    showStatus('authStatus', `Initialization error: ${error.message || error.details || 'Please check your Client ID and ensure the origin is authorized'}`, 'error');
                 }
             }
         }
@@ -203,11 +208,18 @@
         // Sign out
         function signOut() {
             if (accessToken) {
-                google.accounts.oauth2.revoke(accessToken);
+                // Revoke the access token
+                google.accounts.oauth2.revoke(accessToken, () => {
+                    console.log('Token revoked');
+                });
             }
             
+            // Clear local state
             isSignedIn = false;
             accessToken = null;
+            tokenClient = null;
+            
+            // Clear the token from gapi client
             gapi.client.setToken(null);
             
             showStatus('authStatus', 'Signed out successfully', 'info');
